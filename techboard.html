@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechBoard – Dev Community Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #12161f;
+    --surface2: #1a2030;
+    --border: #1e2840;
+    --accent: #00e5a0;
+    --accent2: #0096ff;
+    --accent3: #ff4d6d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --tag-bg: #0d1a2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #000; font-weight: 700;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .online-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 20px; padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent);
+  }
+  .dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* LAYOUT */
+  .layout {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 28px 20px;
+    display: grid;
+    grid-template-columns: 220px 1fr 220px;
+    gap: 20px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .side-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .side-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--accent); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  .tag-list { display: flex; flex-direction: column; gap: 6px; }
+  .tag-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-radius: 8px;
+    cursor: pointer; transition: background 0.15s;
+    font-size: 0.85rem;
+  }
+  .tag-item:hover, .tag-item.active { background: var(--surface2); }
+  .tag-item.active { border-left: 2px solid var(--accent); }
+  .tag-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem; color: var(--muted);
+    background: var(--surface2); padding: 2px 7px; border-radius: 20px;
+  }
+
+  /* MAIN */
+  .main { display: flex; flex-direction: column; gap: 16px; }
+
+  /* POST BOX */
+  .post-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px;
+  }
+
+  .post-box textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+    color: var(--text); resize: vertical; min-height: 90px;
+    outline: none; transition: border 0.2s;
+  }
+  .post-box textarea:focus { border-color: var(--accent); }
+  .post-box textarea::placeholder { color: var(--muted); }
+
+  .post-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; flex-wrap: wrap; gap: 10px;
+  }
+
+  .post-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ptag {
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--tag-bg); color: var(--muted);
+    font-size: 0.78rem; cursor: pointer; transition: all 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ptag.selected { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,0.08); }
+
+  .post-meta { display: flex; align-items: center; gap: 10px; }
+  .name-input {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--text); outline: none; width: 140px; transition: border 0.2s;
+  }
+  .name-input:focus { border-color: var(--accent2); }
+  .name-input::placeholder { color: var(--muted); }
+
+  .post-btn {
+    background: var(--accent); color: #000;
+    border: none; border-radius: 8px; padding: 8px 20px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .post-btn:hover { background: #00ffb3; transform: translateY(-1px); }
+  .post-btn:active { transform: translateY(0); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 0.8rem;
+    cursor: pointer; transition: all 0.15s; font-family: 'JetBrains Mono', monospace;
+  }
+  .filter-btn.active { background: var(--surface2); color: var(--text); border-color: var(--accent2); }
+  .filter-btn:hover { border-color: var(--accent2); color: var(--text); }
+
+  /* POSTS */
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:translateY(0) } }
+  .post-card:hover { border-color: rgba(0,229,160,0.3); }
+
+  .post-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .post-author { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem; color: #000;
+    flex-shrink: 0;
+  }
+  .author-info { display: flex; flex-direction: column; gap: 2px; }
+  .author-name { font-weight: 700; font-size: 0.9rem; }
+  .post-time { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+
+  .post-tag-pill {
+    padding: 3px 10px; border-radius: 20px; font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace; border: 1px solid;
+  }
+
+  .post-body { font-size: 0.9rem; line-height: 1.65; color: #c8d4e8; margin-bottom: 14px; white-space: pre-wrap; word-break: break-word; }
+
+  .post-actions { display: flex; align-items: center; gap: 16px; }
+  .action-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: none; color: var(--muted);
+    font-size: 0.8rem; cursor: pointer; transition: color 0.15s;
+    font-family: 'JetBrains Mono', monospace; padding: 4px 0;
+  }
+  .action-btn:hover { color: var(--accent); }
+  .action-btn.liked { color: var(--accent3); }
+  .action-btn svg { width: 15px; height: 15px; }
+
+  /* REPLY BOX */
+  .replies-section { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
+  .reply-item {
+    display: flex; gap: 10px; margin-bottom: 12px;
+    padding: 10px 12px; background: var(--bg); border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .reply-avatar {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.7rem; color: #000; flex-shrink: 0;
+  }
+  .reply-content { flex: 1; }
+  .reply-author { font-size: 0.78rem; font-weight: 700; margin-bottom: 3px; }
+  .reply-text { font-size: 0.82rem; color: #a0b0c8; line-height: 1.55; }
+
+  .reply-form { display: flex; gap: 8px; margin-top: 10px; }
+  .reply-input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--text); outline: none; transition: border 0.2s;
+  }
+  .reply-input:focus { border-color: var(--accent2); }
+  .reply-input::placeholder { color: var(--muted); }
+  .reply-btn {
+    background: var(--accent2); color: #fff; border: none;
+    border-radius: 8px; padding: 8px 14px; font-size: 0.8rem;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .reply-btn:hover { background: #0080e6; }
+
+  /* RIGHT SIDEBAR */
+  .members-list { display: flex; flex-direction: column; gap: 10px; }
+  .member-item { display: flex; align-items: center; gap: 10px; }
+  .member-avatar {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem; font-weight: 700; color: #000; flex-shrink: 0;
+  }
+  .member-info { flex: 1; }
+  .member-name { font-size: 0.82rem; font-weight: 600; }
+  .member-role { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .member-online { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; text-align: center;
+  }
+  .stat-num { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px;
+  }
+  .search-box input {
+    flex: 1; background: none; border: none; outline: none;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    color: var(--text);
+  }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-icon { color: var(--muted); font-size: 0.9rem; }
+
+  /* EMPTY */
+  .empty-state {
+    text-align: center; padding: 48px 20px;
+    color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  }
+  .empty-state .big { font-size: 2rem; margin-bottom: 8px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--accent); color: #000;
+    padding: 10px 20px; border-radius: 10px;
+    font-weight: 700; font-size: 0.85rem;
+    transform: translateY(60px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* RESPONSIVE */
+  @media(max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar:first-child, .sidebar:last-child { display: none; }
+  }
+  @media(max-width: 600px) {
+    .post-footer { flex-direction: column; align-items: flex-start; }
+    .post-meta { width: 100%; }
+    .name-input { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">&lt;/&gt;</div>
+    Tech<span>Board</span>
+  </div>
+  <div class="header-right">
+    <div class="online-badge"><div class="dot"></div><span id="onlineCount">0 online</span></div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-card">
+      <div class="side-title">// Topics</div>
+      <div class="tag-list" id="tagList"></div>
+    </div>
+    <div class="side-card">
+      <div class="side-title">// Search</div>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="search posts..." oninput="renderPosts()">
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- POST COMPOSER -->
+    <div class="post-box">
+      <textarea id="postContent" placeholder="Share a task, problem, question, or tip with the tech community..."></textarea>
+      <div class="post-footer">
+        <div class="post-tags" id="tagPicker"></div>
+        <div class="post-meta">
+          <input class="name-input" id="posterName" type="text" placeholder="your name / handle">
+          <button class="post-btn" onclick="submitPost()">→ Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('Task',this)">Tasks</button>
+      <button class="filter-btn" onclick="setFilter('Question',this)">Questions</button>
+      <button class="filter-btn" onclick="setFilter('Help',this)">Help Needed</button>
+      <button class="filter-btn" onclick="setFilter('Tip',this)">Tips</button>
+    </div>
+
+    <!-- POSTS FEED -->
+    <div id="feed"></div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-card">
+      <div class="side-title">// Community Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="statPosts">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat-box"><div class="stat-num" id="statMembers">0</div><div class="stat-label">Members</div></div>
+        <div class="stat-box"><div class="stat-num" id="statReplies">0</div><div class="stat-label">Replies</div></div>
+        <div class="stat-box"><div class="stat-num" id="statTags">0</div><div class="stat-label">Topics</div></div>
+      </div>
+    </div>
+    <div class="side-card">
+      <div class="side-title">// Active Members</div>
+      <div class="members-list" id="membersList"></div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────
+const TAGS = ['Task','Question','Help','Tip','Frontend','Backend','AI/ML','DevOps','Mobile','Database'];
+const COLORS = ['#00e5a0','#0096ff','#ff4d6d','#ffd166','#a78bfa','#fb923c','#22d3ee','#4ade80'];
+const TAG_COLORS = {
+  Task:'#00e5a0', Question:'#0096ff', Help:'#ff4d6d', Tip:'#ffd166',
+  Frontend:'#a78bfa', Backend:'#fb923c', 'AI/ML':'#22d3ee', DevOps:'#4ade80', Mobile:'#f472b6', Database:'#60a5fa'
+};
+
+let posts = JSON.parse(localStorage.getItem('tb_posts') || '[]');
+let currentFilter = 'all';
+let selectedTags = [];
+let openReplies = {};
+
+function save() { localStorage.setItem('tb_posts', JSON.stringify(posts)); }
+
+function getColor(name) {
+  let hash = 0;
+  for (let c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xffffffff;
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s<60) return 'just now';
+  if (s<3600) return Math.floor(s/60)+'m ago';
+  if (s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+// ─── INIT TAG PICKER ─────────────────────────────────────────────────
+function initTagPicker() {
+  const el = document.getElementById('tagPicker');
+  TAGS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'ptag'; btn.textContent = '#'+t; btn.dataset.tag = t;
+    btn.onclick = () => {
+      if (selectedTags.includes(t)) {
+        selectedTags = selectedTags.filter(x=>x!==t); btn.classList.remove('selected');
+      } else {
+        selectedTags.push(t); btn.classList.add('selected');
+      }
+    };
+    el.appendChild(btn);
+  });
+}
+
+function initTagList() {
+  const el = document.getElementById('tagList');
+  const all = document.createElement('div');
+  all.className = 'tag-item active'; all.dataset.tag = 'all';
+  all.innerHTML = `<span># all</span><span class="tag-count" id="tc_all">0</span>`;
+  all.onclick = () => { setTagFilter('all'); };
+  el.appendChild(all);
+
+  TAGS.forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'tag-item'; item.dataset.tag = t;
+    item.innerHTML = `<span style="color:${TAG_COLORS[t]||'#fff'}"># ${t.toLowerCase()}</span><span class="tag-count" id="tc_${t}">0</span>`;
+    item.onclick = () => setTagFilter(t);
+    el.appendChild(item);
+  });
+}
+
+let tagFilter = 'all';
+function setTagFilter(tag) {
+  tagFilter = tag;
+  document.querySelectorAll('.tag-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.tag === tag);
+  });
+  renderPosts();
+}
+
+// ─── SUBMIT POST ──────────────────────────────────────────────────────
+function submitPost() {
+  const content = document.getElementById('postContent').value.trim();
+  const name = document.getElementById('posterName').value.trim() || 'Anonymous';
+  if (!content) { showToast('Write something first!'); return; }
+
+  const post = {
+    id: Date.now(),
+    author: name,
+    content,
+    tags: [...selectedTags],
+    ts: Date.now(),
+    likes: 0,
+    likedByMe: false,
+    replies: []
+  };
+  posts.unshift(post);
+  save();
+
+  document.getElementById('postContent').value = '';
+  selectedTags = [];
+  document.querySelectorAll('.ptag').forEach(b=>b.classList.remove('selected'));
+
+  renderPosts();
+  updateStats();
+  showToast('✓ Post shared!');
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPosts();
+}
+
+// ─── RENDER POSTS ─────────────────────────────────────────────────────
+function renderPosts() {
+  const feed = document.getElementById('feed');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = posts.filter(p => {
+    const matchFilter = currentFilter === 'all' || p.tags.includes(currentFilter);
+    const matchTag = tagFilter === 'all' || p.tags.includes(tagFilter);
+    const matchSearch = !search || p.content.toLowerCase().includes(search) || p.author.toLowerCase().includes(search);
+    return matchFilter && matchTag && matchSearch;
+  });
+
+  if (!filtered.length) {
+    feed.innerHTML = `<div class="empty-state"><div class="big">📭</div>No posts yet.<br>Be the first to share something!</div>`;
+    return;
+  }
+
+  feed.innerHTML = filtered.map(p => renderPost(p)).join('');
+  updateTagCounts();
+}
+
+function renderPost(p) {
+  const col = getColor(p.author);
+  const tagPills = p.tags.map(t =>
+    `<span class="post-tag-pill" style="color:${TAG_COLORS[t]||'#fff'};border-color:${TAG_COLORS[t]||'#666'}22;background:${TAG_COLORS[t]||'#fff'}11">#${t}</span>`
+  ).join(' ');
+
+  const repliesHtml = openReplies[p.id] ? `
+    <div class="replies-section">
+      ${p.replies.map(r => `
+        <div class="reply-item">
+          <div class="reply-avatar" style="background:${getColor(r.author)}">${getInitials(r.author)}</div>
+          <div class="reply-content">
+            <div class="reply-author">${r.author}</div>
+            <div class="reply-text">${r.text}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="reply-form">
+        <input class="reply-input" id="ri_${p.id}" placeholder="your reply...">
+        <button class="reply-btn" onclick="submitReply(${p.id})">Send</button>
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="post-card" id="post_${p.id}">
+      <div class="post-header">
+        <div class="post-author">
+          <div class="avatar" style="background:${col}">${getInitials(p.author)}</div>
+          <div class="author-info">
+            <span class="author-name">${p.author}</span>
+            <span class="post-time">${timeAgo(p.ts)}</span>
+          </div>
+        </div>
+        <div>${tagPills}</div>
+      </div>
+      <div class="post-body">${escHtml(p.content)}</div>
+      <div class="post-actions">
+        <button class="action-btn ${p.likedByMe?'liked':''}" onclick="toggleLike(${p.id})">
+          <svg viewBox="0 0 24 24" fill="${p.likedByMe?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          ${p.likes}
+        </button>
+        <button class="action-btn" onclick="toggleReplies(${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          ${p.replies.length} Reply
+        </button>
+        <button class="action-btn" onclick="copyPost(${p.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          Copy
+        </button>
+      </div>
+      ${repliesHtml}
+    </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────────────────
+function toggleLike(id) {
+  const p = posts.find(x=>x.id===id); if(!p) return;
+  p.likedByMe = !p.likedByMe;
+  p.likes += p.likedByMe ? 1 : -1;
+  save(); renderPosts();
+}
+
+function toggleReplies(id) {
+  openReplies[id] = !openReplies[id];
+  renderPosts();
+  if (openReplies[id]) {
+    setTimeout(() => {
+      const inp = document.getElementById('ri_'+id);
+      if (inp) inp.focus();
+    }, 50);
+  }
+}
+
+function submitReply(id) {
+  const inp = document.getElementById('ri_'+id);
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  const name = document.getElementById('posterName').value.trim() || 'Anonymous';
+  const p = posts.find(x=>x.id===id); if(!p) return;
+  p.replies.push({ author: name, text, ts: Date.now() });
+  save(); renderPosts(); updateStats();
+  showToast('✓ Reply sent!');
+}
+
+function copyPost(id) {
+  const p = posts.find(x=>x.id===id); if(!p) return;
+  navigator.clipboard.writeText(`[${p.tags.join(',')||'TechBoard'}] ${p.author}: ${p.content}`);
+  showToast('✓ Copied!');
+}
+
+// ─── STATS & MEMBERS ─────────────────────────────────────────────────
+function updateStats() {
+  const members = [...new Set(posts.map(p=>p.author))];
+  const replies = posts.reduce((a,p)=>a+p.replies.length,0);
+  document.getElementById('statPosts').textContent = posts.length;
+  document.getElementById('statMembers').textContent = members.length;
+  document.getElementById('statReplies').textContent = replies;
+  document.getElementById('statTags').textContent = TAGS.length;
+  document.getElementById('onlineCount').textContent = Math.max(1,Math.min(members.length,8))+' online';
+
+  const ml = document.getElementById('membersList');
+  ml.innerHTML = members.slice(0,6).map(m => `
+    <div class="member-item">
+      <div class="member-avatar" style="background:${getColor(m)}">${getInitials(m)}</div>
+      <div class="member-info">
+        <div class="member-name">${m}</div>
+        <div class="member-role">${posts.find(p=>p.author===m)?.tags[0]||'member'}</div>
+      </div>
+      <div class="member-online"></div>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:0.8rem">No members yet</div>';
+}
+
+function updateTagCounts() {
+  const el = document.getElementById('tc_all');
+  if (el) el.textContent = posts.length;
+  TAGS.forEach(t => {
+    const el = document.getElementById('tc_'+t);
+    if (el) el.textContent = posts.filter(p=>p.tags.includes(t)).length;
+  });
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ─── SEED POSTS ───────────────────────────────────────────────────────
+function seedIfEmpty() {
+  if (posts.length > 0) return;
+  const seeds = [
+    { author:'Rahul_Dev', content:'Looking for someone experienced in React + Firebase. Working on a real-time dashboard project. DM if interested!', tags:['Task','Frontend'], ts: Date.now()-3600000 },
+    { author:'DataPriya', content:'Anyone know a good free alternative to AWS Lambda for small Python scripts? Need something with a free tier.', tags:['Question','Backend'], ts: Date.now()-7200000 },
+    { author:'ArjunML', content:'TIP: Use torch.compile() in PyTorch 2.0+ to get up to 50% speed boost on your training loops with almost zero code change!', tags:['Tip','AI/ML'], ts: Date.now()-14400000 },
+    { author:'DevOps_Ankit', content:'HELP: My Docker container keeps crashing after 2-3 minutes in production. Logs show OOMKilled. Anyone faced this?', tags:['Help','DevOps'], ts: Date.now()-28800000 },
+  ];
+  seeds.forEach((s,i) => {
+    posts.push({ id: Date.now()+i, ...s, likes:0, likedByMe:false, replies:[] });
+  });
+  save();
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────
+seedIfEmpty();
+initTagPicker();
+initTagList();
+renderPosts();
+updateStats();
+
+// Live time refresh
+setInterval(() => {
+  document.querySelectorAll('.post-time').forEach((el, i) => {
+    if (posts[i]) el.textContent = timeAgo(posts[i].ts);
+  });
+}, 30000);
+</script>
+</body>
+</html>
